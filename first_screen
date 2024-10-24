@@ -1,0 +1,147 @@
+require 'gosu'
+
+class GameWindow < Gosu::Window
+  def initialize
+    super 800, 600  # Width, Height
+    self.caption = "Health Care Background"
+
+    # Load the background image
+    @background_image = Gosu::Image.new('E:/gosu/Custom_Project/Background.png') # Update with image path
+
+    # Load the start button image
+    @start_button_image= Gosu::Image.new('E:/gosu/Custom_Project/start_button.png')
+
+    # Set up font
+    @font = Gosu::Font.new(48)  # Font size of 32
+
+    # Input box properties for name
+    @input_text = ""
+    @input_box_x = 270
+    @input_box_y = 340
+    @input_box_width = 300
+    @input_box_height = 60
+
+    # Input box properties for age
+    @age_input_text = ""
+    @age_input_box_x = 100
+    @age_input_box_y = 100
+    @age_input_box_width = 300
+    @age_input_box_height = 60
+
+    # Position for the start button
+    @start_button_x = 280
+    @start_button_y = 370
+
+    # Initial state
+    @state = :input_name    #States: input_name, :ask_age
+
+  end
+
+  def update
+    # Update game logic here
+  end
+  
+  #______________________________draw____________________________________
+  def draw
+    # Draw the background image
+    @background_image.draw(0, 0, 0) # (x, y, z)
+
+    case @state
+    when :input_name
+    # Draw the input_name
+    draw_text("Welcome to Health Care", 200, 180, 10) 
+    draw_text("What is your name?", 240, 280, 10) 
+
+    # Draw input box for name
+    draw_input_box(@input_box_x, @input_box_y, @input_box_width, @input_box_height)
+
+    # Draw the current input text
+    draw_text(@input_text, @input_box_x + 10, @input_box_y + 5, 2)  # Add padding inside the box
+
+    #Draw the start button
+    @start_button_image.draw(@start_button_x, @start_button_y, 1)
+
+    when :ask_age
+    # Ask the user how old they are
+    draw_text("Hi #{@input_text}, How old are you?", 50, 50, 1)
+
+    # Draw input box for age
+    draw_input_box(@age_input_box_x, @age_input_box_y, @age_input_box_width, @age_input_box_height)
+    
+    #Draw the current age input text inside the box
+    draw_text(@age_input_text, @age_input_box_x + 10, @age_input_box_y + 5, 2)
+    end
+  end
+
+  def draw_text(text, x, y, z)  # Accept parameters for text, x, y, and z
+    @font.draw_text(text, x, y, z, 1.0, 1.0, Gosu::Color::BLACK)
+  end
+  
+  def draw_input_box(x, y, width, height)
+    # Draw a rectangle for the input box
+    Gosu.draw_rect(@input_box_x, @input_box_y, @input_box_width, @input_box_height, Gosu::Color::BLACK, 0)
+    Gosu.draw_rect(@input_box_x, @input_box_y, @input_box_width, @input_box_height, Gosu::Color::WHITE, 1) # Border
+  end
+
+  #___________________________logic function__________________________________
+
+  def button_down(id)
+    case id
+    when Gosu::KbBackspace
+      # Handle backspace key to remove the last character
+      if @state == :input_name
+        @input_text.chop! if @input_text.length > 0
+      elsif @state == :ask_age
+        @age_input_text.chop! if @age_input_text.length > 0
+      end
+
+    when Gosu::KbReturn
+      # Handle Enter key press
+      if @state == :input_name
+        puts "Name entered: #{@input_text}"
+        @state = :ask_age  # Move to the next state (ask age)
+      elsif @state == :ask_age
+        puts "Age entered: #{@age_input_text}"
+        @input_text = ""   # Clear inputs after pressing Enter
+        @age_input_text = ""
+      end
+
+    when Gosu::MsLeft
+      # Handle mouse click for the start button
+      handle_mouse_click(mouse_x, mouse_y)
+
+    else
+      # Capture alphanumeric input
+      if @state == :input_name
+        if id.between?(Gosu::KbA, Gosu::KbZ)
+          @input_text += (id - Gosu::KbA + 65).chr # Convert to character (A-Z)
+        elsif id == Gosu::KbSpace
+          @input_text += " " # Space character
+        end
+      # Capture numeric input for age
+      elsif @state == :ask_age
+        if id.between?(Gosu::Kb0, Gosu::Kb9)
+          @age_input_text += (id - Gosu::Kb0 + 48).chr # Convert to character (0-9)
+        end
+      end
+    end
+  end
+
+  def handle_mouse_click(mouse_x, mouse_y)
+    if @state == :input_name
+      # Check if the start button was clicked
+      if mouse_over_button?(mouse_x, mouse_y, @start_button_x, @start_button_y, @start_button_image.width, @start_button_image.height)
+        @state = :ask_age  # Move to the next state (ask age)
+      end
+    end
+  end
+
+  # Helper method to check if the mouse is over a button
+  def mouse_over_button?(mouse_x, mouse_y, button_x, button_y, button_width, button_height)
+    mouse_x >= button_x && mouse_x <= button_x + button_width &&
+    mouse_y >= button_y && mouse_y <= button_y + button_height
+  end
+end
+
+window = GameWindow.new
+window.show
