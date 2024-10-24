@@ -79,8 +79,8 @@ class GameWindow < Gosu::Window
   
   def draw_input_box(x, y, width, height)
     # Draw a rectangle for the input box
-    Gosu.draw_rect(@input_box_x, @input_box_y, @input_box_width, @input_box_height, Gosu::Color::BLACK, 0)
-    Gosu.draw_rect(@input_box_x, @input_box_y, @input_box_width, @input_box_height, Gosu::Color::WHITE, 1) # Border
+    Gosu.draw_rect(x, y, @input_box_width, @input_box_height, Gosu::Color::BLACK, 0)
+    Gosu.draw_rect(x, y, @input_box_width, @input_box_height, Gosu::Color::WHITE, 1) # Border
   end
 
   #___________________________logic function__________________________________
@@ -101,7 +101,8 @@ class GameWindow < Gosu::Window
         puts "Name entered: #{@input_text}"
         @state = :ask_age  # Move to the next state (ask age)
       elsif @state == :ask_age
-        puts "Age entered: #{@age_input_text}"
+        @age = @age_input_text.to_i   # Convert the age input text to an integer
+        puts "Age entered: #{@age}"
         @input_text = ""   # Clear inputs after pressing Enter
         @age_input_text = ""
       end
@@ -120,8 +121,8 @@ class GameWindow < Gosu::Window
         end
       # Capture numeric input for age
       elsif @state == :ask_age
-        if id.between?(Gosu::Kb0, Gosu::Kb9)
-          @age_input_text += (id - Gosu::Kb0 + 48).chr # Convert to character (0-9)
+        if id.between?(Gosu::Kb1, Gosu::Kb0)
+          @age_input_text += (id - Gosu::Kb1).to_s # Convert to character (0-9)
         end
       end
     end
